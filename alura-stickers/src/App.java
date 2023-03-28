@@ -5,6 +5,8 @@ import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.util.List;
 import java.util.Map;
+import java.io.InputStream;
+import java.net.URL;
 
 public class App {
     public static void main(String[] args) throws Exception {
@@ -31,11 +33,23 @@ public class App {
         //System.out.println(listaDeFilmes.get(0));
 
         //Exibir e manipular os dados do jeito que acharmos melhor
+        var geradora = new GeradoraDeFigurinha();
         for (Map<String,String> filme : listaDeFilmes) {
-            System.out.println(filme.get("title"));
-            System.out.println(filme.get("image"));
+
+            String urlImage = filme.get("image");
+            String titulo = filme.get("title");
+
+            InputStream inputStream = new URL(urlImage).openStream();
+
+            String nomeArquivo = titulo + ".png";
+
+            geradora.cria(inputStream, nomeArquivo);
+            
+            System.out.println(titulo);
+            System.out.println(urlImage);
             System.out.println(filme.get("imDbRating"));
             System.out.println();
+
         }
     }
 }
