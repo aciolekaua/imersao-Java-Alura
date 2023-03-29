@@ -1,55 +1,46 @@
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.net.http.HttpResponse.BodyHandlers;
 import java.util.List;
-import java.util.Map;
 import java.io.InputStream;
 import java.net.URL;
 
 public class App {
     public static void main(String[] args) throws Exception {
-        //System.out.println("Hello, World!");
+        //System.out.println("Hello, World!")
 
-        //Fazer uma conexão HTTP e buscar os top 250 filmes
-        String url = "https://raw.githubusercontent.com/alura-cursos/imersao-java-2-api/main/TopMovies.json";
-        URI endereco = URI.create(url);
-        var client = HttpClient.newHttpClient();
-        var request = HttpRequest.newBuilder(endereco).GET().build();
-        HttpResponse<String> response = client.send(request, BodyHandlers.ofString()); //outra forma de chamar sem usar o var
-        //var response = client.send(request, BodyHandlers.ofString());
+        //API IMdb 
+        //String url = "https://raw.githubusercontent.com/alura-cursos/imersao-java-2-api/main/TopMovies.json";
 
-        String body = response.body();
+        //API Nasa APOD
+        String url = "https://api.nasa.gov/planetary/apod?api_key=w9uHh3hcFJ4B5NDQmCrpUPTmJdDwZkzv0fxFvLI5&start_date=2022-06-12&end_date=2022-06-14";
 
-        //System.out.println(body);
+        var http = new ClienteHttp();
+        String json = http.buscaDados(url);
 
+        ExtratorDeConteudoDaNasa extrator = new ExtratorDeConteudoDaNasa();
+        //ExtratorDeConteudoDoIMDB extrator = new ExtratorDeConteudoDoIMDB();
 
-        //Extrair os Dados que queremos (titulo do filme,poster,nota)
-        var parser = new JsonParser();
-        List<Map<String, String>> listaDeFilmes = parser.parse(body);
-        
-        //System.out.println(listaDeFilmes.size());
-        //System.out.println(listaDeFilmes.get(0));
+        List<Conteudo> conteudos = extrator.extraiConteudos(json);
 
-        //Exibir e manipular os dados do jeito que acharmos melhor
         var geradora = new GeradoraDeFigurinha();
-        for (Map<String,String> filme : listaDeFilmes) {
+        for (int i = 0; i < 3; i++) {
 
-            String urlImage = filme.get("image");
-            String titulo = filme.get("title");
+            Conteudo conteudo = conteudos.get(i);
+            
+            //API IMdb 
+            //String urlImage = conteudo.get("image").replaceAll("(@+)(.*).jpg", "$1.jpg");
 
-            InputStream inputStream = new URL(urlImage).openStream();
+            //API Nasa APOD
+            
 
-            String nomeArquivo = titulo + ".png";
+            InputStream inputStream = new URL(conteudo.getUrlImagem()).openStream();
+            String nomeArquivo = "saida/" + conteudo.getTitulo() + ".png";
 
             geradora.cria(inputStream, nomeArquivo);
             
-            System.out.println(titulo);
-            System.out.println(urlImage);
-            System.out.println(filme.get("imDbRating"));
-            System.out.println();
+            System.out.println(conteudo.getTitulo());
+            //System.out.println(urlImage);
+            //System.out.println(conteudo.get("imDbRating"));
 
         }
     }
 }
+//
